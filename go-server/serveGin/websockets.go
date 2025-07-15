@@ -1,7 +1,9 @@
 package serveGin
 
 import (
+	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 
@@ -9,9 +11,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type WSEvents struct {
-	Event string `json:"event"`
-	Data  string `json:"data"`
+type WSEvent struct {
+	Event  string `json:"event"`
+	Data   string `json:"data"`
+	Sender string `json:"sender"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -21,15 +24,26 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-var clients = make(map[*websocket.Conn]bool)
+type Client struct {
+	Conn *websocket.Conn
+	ID   string // user ID, session token, etc.
+}
 
-var broadcast = make(chan WSEvents)
+var clients = make(map[*Client]bool)
+
+var broadcast = make(chan WSEvent)
 
 const (
 	pingPeriod = 30 * time.Second
 	pongWait   = 60 * time.Second
 	writeWait  = 10 * time.Second
 )
+
+func generateID() string {
+	timestamp := time.Now().UnixNano() // nanoseconds for more precision
+	randomPart := rand.Intn(1000000)   // optional random bits
+	return fmt.Sprintf("%d-%06d", timestamp, randomPart)
+}
 
 func handleWebSocket(c *gin.Context) {
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -39,24 +53,29 @@ func handleWebSocket(c *gin.Context) {
 	}
 	defer ws.Close()
 
-	clients[ws] = true
-	log.Println("Client connected:", ws.RemoteAddr())
+	newClient := &Client{
+		Conn: ws,
+		ID:   generateID(),
+	}
+	clients[newClient] = true
+	fmt.Printf("Client %s connected: %s\n", newClient.ID, newClient.Conn.RemoteAddr())
 
-	ws.SetReadLimit(512)
-	ws.SetReadDeadline(time.Now().Add(pongWait))
-	ws.SetPongHandler(func(string) error {
-		ws.SetReadDeadline(time.Now().Add(pongWait))
+	newClient.Conn.SetReadLimit(512)
+	newClient.Conn.SetReadDeadline(time.Now().Add(pongWait))
+	newClient.Conn.SetPongHandler(func(string) error {
+		newClient.Conn.SetReadDeadline(time.Now().Add(pongWait))
 		return nil
 	})
 
-	go pingClient(ws) // <- start pinging in the background
+	go pingClient(newClient.Conn)
 
 	for {
-		var event WSEvents
-		err := ws.ReadJSON(&event)
+		var event WSEvent
+		event.Sender = newClient.ID
+		err := newClient.Conn.ReadJSON(&event)
 		if err != nil {
 			log.Println("WebSocket read error:", err)
-			delete(clients, ws)
+			delete(clients, newClient)
 			break
 		}
 		broadcast <- event
@@ -95,24 +114,24 @@ func HandleMessages() {
 	}
 }
 
-func broadcastMessage(event WSEvents) {
+func broadcastMessage(event WSEvent) {
 	for client := range clients {
 		log.Printf("message: %s\n", event.Data)
 		event.Data = "Message sent." // Ensure data is set for each client
-		err := client.WriteJSON(event)
+		err := client.Conn.WriteJSON(event)
 		if err != nil {
 			log.Println("WebSocket write error:", err)
-			client.Close()
+			client.Conn.Close()
 			delete(clients, client)
 		}
 	}
 }
 
-func handleConnection(event WSEvents) {
+func handleConnection(event WSEvent) {
 	log.Printf("%s connected.\n", event.Data)
 }
 
-func handleDisconnection(event WSEvents) {
+func handleDisconnection(event WSEvent) {
 	log.Printf("%s disconnected.\n", event.Data)
 }
 
