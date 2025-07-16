@@ -58,7 +58,7 @@ func handleWebSocket(c *gin.Context) {
 		ID:   generateID(),
 	}
 	clients[newClient] = true
-	fmt.Printf("Client %s connected: %s\n", newClient.ID, newClient.Conn.RemoteAddr())
+	log.Printf("Client %s connected: %s\n", newClient.ID, newClient.Conn.RemoteAddr())
 
 	newClient.Conn.SetReadLimit(512)
 	newClient.Conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -97,7 +97,7 @@ func pingClient(ws *websocket.Conn) {
 }
 
 func HandleMessages() {
-	log.Println("WebSocket ready for messages")
+	log.Println("WebSocket server listening for events...")
 	for {
 		event := <-broadcast
 
