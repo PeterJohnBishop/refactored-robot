@@ -1,18 +1,45 @@
-const express = require('express');
-const app = express();
-const connectMongo = require('./db'); 
+import { ApolloServer } from '@apollo/server';
+import { startStandaloneServer } from '@apollo/server/standalone';
+import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
+import typeDefs from './schema/typeDefs.js';
+import resolvers from './schema/resolvers.js';
+import connectMongo from './db.js';
+import User from './models/User.js';  // import your User model
 
-require('dotenv').config()
-connectMongo(); 
+dotenv.config();
+connectMongo();
 
-const PORT = process.env.NODE_PORT || 3001;
+const getUserFromToken = (req) => {
+  const authHeader = req.headers.authorization || "";
+  if (authHeader.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      return decoded.user;
+    } catch {
+      throw new Error("Invalid or expired token");
+    }
+  }
+  return null;
+};
 
-app.use(express.json()); 
+async function start() {
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+  });
 
-app.get('/', (req, res) => {
-  res.send('Hello, Express!');
-});
+  const { url } = await startStandaloneServer(server, {
+    listen: { port: process.env.NODE_PORT || 3000 },
 
-app.listen(PORT, () => {
-  console.log(`Express server is running on port ${PORT}`);
-});
+    context: async ({ req }) => {
+      const user = getUserFromToken(req);
+      return { user, User };
+    },
+  });
+
+  console.log(`Apollo Server ready at ${url}`);
+}
+
+start().catch(console.error);
