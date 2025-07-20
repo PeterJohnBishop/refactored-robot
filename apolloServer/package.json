@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "node-server": "node server.js",
-    "go-server": "cd .. && cd go-server && go run main.go",
+    "go-server": "cd .. && cd ginServer && go run main.go",
     "dev": "concurrently \"npm run node-server\" \"npm run go-server\"",
     "start": "node server.js"
   },

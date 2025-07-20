@@ -42,4 +42,13 @@ async function start() {
   console.log(`Apollo Server ready at ${url}`);
 }
 
+const socket = new WebSocket("ws://localhost:8080/ws");
+
+socket.onopen = function() {
+      socket.send(JSON.stringify({
+        event: "connect",
+        data: "Apollo server connection established"
+        }));
+    };
+
 start().catch(console.error);
