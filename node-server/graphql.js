@@ -35,7 +35,7 @@ async function startGraphQLServer() {
         },
       });
     
-    console.log(`Apollo Server ready at ${url}`);
+    console.log(`Apollo GraphQL ready at ${url}graphql`);
 
 }
 

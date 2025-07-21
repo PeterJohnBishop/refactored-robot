@@ -97,7 +97,7 @@ func pingClient(ws *websocket.Conn) {
 }
 
 func HandleMessages() {
-	log.Println("WebSocket server listening for events...")
+	fmt.Println("WebSocket server listening for events at ws://localhost:8081/ws")
 	for {
 		event := <-broadcast
 
