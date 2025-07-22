@@ -1,9 +1,12 @@
 import mongoose from "mongoose";
 
-const connectMongo = async () => {
+const connectMongo = async (socket) => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log("MongoDB connection established");
+    socket.send(JSON.stringify({
+      event: "connect",
+      data: "MongoDB connected"
+    }));
   } catch (err) {
     console.error(err.message);
     process.exit(1);

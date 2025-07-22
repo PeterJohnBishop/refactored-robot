@@ -11,9 +11,12 @@ app.use(bodyParser.json());
 
 app.use('/api', routes);
 
-function startRESTServer() {
+function startRESTServer(socket) {
   app.listen(REST_PORT, () => {
-    console.log(`REST API ready at http://localhost:${REST_PORT}/api`);
+    socket.send(JSON.stringify({
+    event: "connect",
+    data: `REST API ready at http://localhost:${REST_PORT}/api`
+    }));
   });
 }
 

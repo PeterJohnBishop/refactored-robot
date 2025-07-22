@@ -2,18 +2,22 @@ import dotenv from 'dotenv';
 import connectMongo from './graphql/mongodb.js';
 import startGraphQLServer from './graphql/graphql.js';
 import startRESTServer from './api/restAPI.js';
+import { connectWebSocketWithRetry } from './ws.js';
 
 dotenv.config();
 
-connectMongo().catch(console.error);
-startGraphQLServer().catch(console.error);
-startRESTServer()
-
-const socket = new WebSocket("ws://localhost:8080/ws");
-
-socket.onopen = function() {
-    socket.send(JSON.stringify({
+connectWebSocketWithRetry("ws://localhost:8080/ws", (socket) => {
+  socket.send(JSON.stringify({
     event: "connect",
     data: "Node server"
-    }));
-};
+  }));
+
+  connectMongo(socket).catch(console.error);
+  startGraphQLServer(socket).catch(console.error);
+  startRESTServer(socket);
+});
+
+
+
+
+

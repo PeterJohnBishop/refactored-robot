@@ -5,7 +5,7 @@ import resolvers from '../graphql/schema/resolvers.js';
 import User from '../graphql/models/User.js';  
 import getUserFromToken from '../graphql/middleware/auth.js'; 
 
-async function startGraphQLServer() {
+async function startGraphQLServer(socket) {
 
     const server = new ApolloServer({
         typeDefs,
@@ -21,7 +21,10 @@ async function startGraphQLServer() {
         },
       });
     
-    console.log(`Apollo GraphQL ready at ${url}graphql`);
+    socket.send(JSON.stringify({
+    event: "connect",
+    data: `Apollo GraphQL ready at ${url}graphql`
+    }));
 
 }
 

@@ -1,7 +1,6 @@
 package serveGin
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -58,7 +57,7 @@ func handleWebSocket(c *gin.Context) {
 		ID:   "ws_" + generateID(),
 	}
 	clients[newClient] = true
-	log.Printf("Client %s connected: %s\n", newClient.ID, newClient.Conn.RemoteAddr())
+	// log.Printf("Client %s connected: %s\n", newClient.ID, newClient.Conn.RemoteAddr())
 
 	newClient.Conn.SetReadLimit(512)
 	newClient.Conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -107,7 +106,7 @@ func HandleMessages() {
 		port = "8081"
 	}
 
-	fmt.Printf("WebSocket server ready for events at ws://localhost:%s/ws\n", port)
+	log.Printf("WebSocket server ready for events at ws://localhost:%s/ws\n", port)
 	for {
 		event := <-broadcast
 
