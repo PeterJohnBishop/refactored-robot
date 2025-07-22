@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
-import connectMongo from './mongodb.js';
-import startGraphQLServer from './graphql.js';
-import startRESTServer from './restAPI.js';
+import connectMongo from './graphql/mongodb.js';
+import startGraphQLServer from './graphql/graphql.js';
+import startRESTServer from './api/restAPI.js';
 
 dotenv.config();
 

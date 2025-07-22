@@ -1,12 +1,17 @@
-import User from '../models/User.js'; 
+import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const resolvers = {
   Query: {
-    me: async (_, __, { user }) => {
-      if (!user) throw new Error("Not authenticated");
-      return await User.findById(user.id);
+    user: async (_, { id }) => {
+      const user = await User.findById(id);
+      if (!user) throw new Error("User not found");
+      return user;
+    },
+
+    users: async () => {
+      return await User.find();
     },
   },
 
@@ -29,10 +34,7 @@ const resolvers = {
         { expiresIn: "7d" }
       );
 
-      return {
-        token,
-        user: newUser,
-      };
+      return { token, user: newUser };
     },
 
     login: async (_, { email, password }) => {
@@ -48,10 +50,26 @@ const resolvers = {
         { expiresIn: "7d" }
       );
 
-      return {
-        token,
-        user,
-      };
+      return { token, user };
+    },
+
+    updateUser: async (_, { id, data }) => {
+      if (data.password) {
+        data.password = await bcrypt.hash(data.password, 10);
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(id, data, {
+        new: true,
+        runValidators: true,
+      });
+
+      if (!updatedUser) throw new Error("User not found");
+      return updatedUser;
+    },
+
+    deleteUser: async (_, { id }) => {
+      const deleted = await User.findByIdAndDelete(id);
+      return !!deleted;
     },
   },
 };

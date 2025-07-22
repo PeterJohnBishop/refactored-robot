@@ -3,12 +3,14 @@ package serveGin
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/subosito/gotenv"
 )
 
 type WSEvent struct {
@@ -40,9 +42,7 @@ const (
 )
 
 func generateID() string {
-	timestamp := time.Now().UnixNano() // nanoseconds for more precision
-	randomPart := rand.Intn(1000000)   // optional random bits
-	return fmt.Sprintf("%d-%06d", timestamp, randomPart)
+	return uuid.New().String()
 }
 
 func handleWebSocket(c *gin.Context) {
@@ -55,7 +55,7 @@ func handleWebSocket(c *gin.Context) {
 
 	newClient := &Client{
 		Conn: ws,
-		ID:   generateID(),
+		ID:   "ws_" + generateID(),
 	}
 	clients[newClient] = true
 	log.Printf("Client %s connected: %s\n", newClient.ID, newClient.Conn.RemoteAddr())
@@ -97,7 +97,17 @@ func pingClient(ws *websocket.Conn) {
 }
 
 func HandleMessages() {
-	fmt.Println("WebSocket server listening for events at ws://localhost:8081/ws")
+
+	err := gotenv.Load(".env")
+	if err != nil {
+		log.Println("Error loading .env file:", err)
+	}
+	port := os.Getenv("GO_PORT")
+	if port == "" {
+		port = "8081"
+	}
+
+	fmt.Printf("WebSocket server ready for events at ws://localhost:%s/ws\n", port)
 	for {
 		event := <-broadcast
 
