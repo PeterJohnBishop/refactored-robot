@@ -9,7 +9,7 @@ import {
     getAllUsers,
     updateUser,
     deleteUserById, 
-} from "./users.js";
+} from "./user-controller.js";
 
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;

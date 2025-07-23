@@ -1,10 +1,14 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import routes from './routes.js';
 
+dotenv.config();
+
 const app = express();
-const REST_PORT = 3000;
+
+const port = process.env.REST_PORT || 3002;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -12,10 +16,10 @@ app.use(bodyParser.json());
 app.use('/api', routes);
 
 function startRESTServer(socket) {
-  app.listen(REST_PORT, () => {
+  app.listen(port, () => {
     socket.send(JSON.stringify({
     event: "connect",
-    data: `REST API ready at http://localhost:${REST_PORT}/api`
+    data: `REST API ready at http://localhost:${port}/api`
     }));
   });
 }

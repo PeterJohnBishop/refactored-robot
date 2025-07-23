@@ -1,0 +1,41 @@
+
+services:
+  node-server:
+    build:
+      context: ./node-server
+    container_name: node-server
+    ports:
+      - "3000:3000"     # REST API
+      - "3001:3001"     # GraphQL
+    env_file:
+      - ./node-server/.env
+    depends_on:
+      - mongo
+    command: npm run node-server
+    volumes:
+      - ./node-server:/app
+    working_dir: /app
+
+  go-server:
+    build:
+      context: ./go-server
+    container_name: go-server
+    ports:
+      - "8080:8080"     # WebSocket + Gin server
+    depends_on:
+      - node-server
+    volumes:
+      - ./go-server:/go/src/app
+    working_dir: /go/src/app
+    command: go run main.go
+
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
