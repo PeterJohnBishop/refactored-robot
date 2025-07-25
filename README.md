@@ -16,4 +16,7 @@ Initializes the websocket server.
 Handles websocket API to provide frontend to backend, and server to server communication.
 
 
-
+http://localhost/api-go/	Go REST API
+ws://localhost/ws/	Go WebSocket Server
+http://localhost/api/	Node REST API
+http://localhost/graphql/	Apollo GraphQL Server

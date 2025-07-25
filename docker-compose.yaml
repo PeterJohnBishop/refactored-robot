@@ -1,5 +1,15 @@
-
 services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"  # Single unified access point at http://localhost
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - node-server
+      - go-server
+
   node-server:
     build:
       context: ./node-server
