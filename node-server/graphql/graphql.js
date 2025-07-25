@@ -23,7 +23,7 @@ async function startGraphQLServer(socket) {
     
     socket.send(JSON.stringify({
     event: "connect",
-    data: `Apollo GraphQL ready at ${url}graphql`
+    data: `Apollo GraphQL ready at http://localhost/graphql-api`
     }));
 
 }

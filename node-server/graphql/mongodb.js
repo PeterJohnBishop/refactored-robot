@@ -5,7 +5,7 @@ const connectMongo = async (socket) => {
     await mongoose.connect(process.env.MONGODB_URI);
     socket.send(JSON.stringify({
       event: "connect",
-      data: "MongoDB connected"
+      data: "MongoDB connection is live."
     }));
   } catch (err) {
     console.error(err.message);

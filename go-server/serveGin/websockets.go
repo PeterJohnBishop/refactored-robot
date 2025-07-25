@@ -106,7 +106,7 @@ func HandleMessages() {
 		port = "8081"
 	}
 
-	log.Printf("WebSocket server ready for events at ws://localhost:%s/ws\n", port)
+	log.Printf("WebSocket server ready for events at ws://localhost/ws\n")
 	for {
 		event := <-broadcast
 
@@ -137,7 +137,7 @@ func broadcastMessage(event WSEvent) {
 }
 
 func handleConnection(event WSEvent) {
-	log.Printf("%s connected.\n", event.Data)
+	log.Printf("%s.\n", event.Data)
 }
 
 func handleDisconnection(event WSEvent) {

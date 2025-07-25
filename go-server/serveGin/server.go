@@ -24,7 +24,7 @@ func Init() {
 	r := gin.Default()
 	WebSocketRoutes(r)
 
-	log.Printf("Gin server ready at http://localhost:%s/\n", port)
+	log.Printf("Gin server ready at http://localhost/gin-api\n")
 	err = r.Run(fmt.Sprintf(":%s", port))
 	if err != nil {
 		log.Println("Failed to start server:", err)

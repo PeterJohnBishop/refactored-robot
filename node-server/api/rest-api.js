@@ -19,7 +19,7 @@ function startRESTServer(socket) {
   app.listen(port, () => {
     socket.send(JSON.stringify({
     event: "connect",
-    data: `REST API ready at http://localhost:${port}/api`
+    data: `Node server ready at http://localhost/express-api`
     }));
   });
 }
